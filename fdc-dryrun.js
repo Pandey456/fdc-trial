@@ -13,10 +13,10 @@ const body = {
     queryParams: JSON.stringify({ symbol: "BTCUSDT" }),
     body: "{}",
     postProcessJq: "{ price: (.price | tonumber | . * 100000000 | floor) }",
-    abiSignature: {
+    abiSignature: JSON.stringify({
       type: "tuple",
       components: [{ name: "price", type: "uint256" }],
-    },
+    }),
   },
 };
 
