@@ -7,17 +7,13 @@ const toBytes32 = (s) => "0x" + Buffer.from(s).toString("hex").padEnd(64, "0");
 // ACTIVE: CoinGecko. Shape: {"bitcoin":{"usd":63843.69}} — price is a NUMBER.
 // ---------------------------------------------------------------------------
 const requestBody = {
-  url: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+  url: "https://jsonplaceholder.typicode.com/todos/1",
   httpMethod: "GET",
   headers: "{}",
-  queryParams: "{}", // params are already in the URL
+  queryParams: "{}",
   body: "{}",
-  // *1e8, then chop decimals via split (no floor, which jq here disallows)
-  postProcessJq: "{ price: ((.bitcoin.usd * 100000000 | tostring) | split(\".\")[0] | tonumber) }",
-  abiSignature: JSON.stringify({
-    type: "tuple",
-    components: [{ name: "price", type: "uint256" }],
-  }),
+  postProcessJq: ".completed",
+  abiSignature: JSON.stringify("bool"),
 };
 
 // ---------------------------------------------------------------------------
