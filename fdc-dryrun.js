@@ -7,7 +7,7 @@ const body = {
   attestationType: toBytes32("Web2Json"),
   sourceId: toBytes32("PublicWeb2"),
   requestBody: {
-    url: "https://api.binance.com/api/v3/ticker/price",
+    url: "https://data-api.binance.vision/api/v3/ticker/price",
     httpMethod: "GET",
     headers: "{}",
     queryParams: JSON.stringify({ symbol: "BTCUSDT" }),
