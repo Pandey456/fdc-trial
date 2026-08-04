@@ -12,7 +12,7 @@ const body = {
     headers: "{}",
     queryParams: JSON.stringify({ symbol: "BTCUSDT" }),
     body: "{}",
-    postProcessJq: "{ price: (.price | tonumber | . * 100000000 | floor) }",
+    postProcessJq: "{ price: (.price | gsub(\"[.]\"; \"\") | tonumber) }",
     abiSignature: JSON.stringify({
       type: "tuple",
       components: [{ name: "price", type: "uint256" }],
