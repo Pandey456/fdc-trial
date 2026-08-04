@@ -3,21 +3,45 @@ const API_KEY = "00000000-0000-0000-0000-000000000000";
 
 const toBytes32 = (s) => "0x" + Buffer.from(s).toString("hex").padEnd(64, "0");
 
+// ---------------------------------------------------------------------------
+// ACTIVE: CoinGecko. Shape: {"bitcoin":{"usd":63843.69}} — price is a NUMBER.
+// ---------------------------------------------------------------------------
+const requestBody = {
+  url: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+  httpMethod: "GET",
+  headers: "{}",
+  queryParams: "{}", // params are already in the URL
+  body: "{}",
+  // *1e8, then chop decimals via split (no floor, which jq here disallows)
+  postProcessJq: "{ price: ((.bitcoin.usd * 100000000 | tostring) | split(\".\")[0] | tonumber) }",
+  abiSignature: JSON.stringify({
+    type: "tuple",
+    components: [{ name: "price", type: "uint256" }],
+  }),
+};
+
+// ---------------------------------------------------------------------------
+// FALLBACK: Binance market-data mirror. Shape: {"symbol":..,"price":"63843.69000000"}
+// If CoinGecko FETCH ERRORs, comment out the block above and uncomment this one.
+// ---------------------------------------------------------------------------
+// const requestBody = {
+//   url: "https://data-api.binance.vision/api/v3/ticker/price",
+//   httpMethod: "GET",
+//   headers: "{}",
+//   queryParams: JSON.stringify({ symbol: "BTCUSDT" }),
+//   body: "{}",
+//   // price is a STRING with 8 decimals -> delete the dot -> already *1e8 integer
+//   postProcessJq: "{ price: (.price | gsub(\"[.]\"; \"\") | tonumber) }",
+//   abiSignature: JSON.stringify({
+//     type: "tuple",
+//     components: [{ name: "price", type: "uint256" }],
+//   }),
+// };
+
 const body = {
   attestationType: toBytes32("Web2Json"),
   sourceId: toBytes32("PublicWeb2"),
-  requestBody: {
-    url: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
-    httpMethod: "GET",
-    headers: "{}",
-    queryParams: JSON.stringify({ symbol: "BTCUSDT" }),
-    body: "{}",
-    postProcessJq: "{ price: (.price | gsub(\"[.]\"; \"\") | tonumber) }",
-    abiSignature: JSON.stringify({
-      type: "tuple",
-      components: [{ name: "price", type: "uint256" }],
-    }),
-  },
+  requestBody,
 };
 
 (async () => {
