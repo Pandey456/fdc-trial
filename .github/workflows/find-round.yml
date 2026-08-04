@@ -1,0 +1,10 @@
+name: find round
+on:
+  workflow_dispatch:
+jobs:
+  find:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install ethers
+      - run: node find-round.js
