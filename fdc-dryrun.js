@@ -13,7 +13,7 @@ const requestBody = {
   queryParams: "{}",
   body: "{}",
   postProcessJq: ".completed",
-  abiSignature: JSON.stringify("bool"),
+  abiSignature: "bool",
 };
 
 // ---------------------------------------------------------------------------
