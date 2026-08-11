@@ -24,7 +24,7 @@ const tokenPairs = {
   SOL: "SOL-USD",
 };
 
-const selectedToken = "BTC";
+const selectedToken = "ETH";
 
 const requestBody = {
   url: `https://api.coinbase.com/v2/prices/${tokenPairs[selectedToken]}/spot`,
