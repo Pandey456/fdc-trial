@@ -6,13 +6,36 @@ const toBytes32 = (s) => "0x" + Buffer.from(s).toString("hex").padEnd(64, "0");
 // ---------------------------------------------------------------------------
 // ACTIVE: CoinGecko. Shape: {"bitcoin":{"usd":63843.69}} — price is a NUMBER.
 // ---------------------------------------------------------------------------
+// const requestBody = {
+//   url: "https://api.coinbase.com/v2/prices/BTC-USD/spot",
+//   httpMethod: "GET",
+//   headers: "{}",
+//   queryParams: "{}",
+//   body: "{}",
+//   postProcessJq: "{ price: ((.data.amount | tonumber) * 100000000 | tostring | split(\".\")[0] | tonumber) }",
+//   abiSignature: JSON.stringify({
+//     type: "tuple",
+//     components: [{ name: "price", type: "uint256" }],
+//   }),
+// };
+const tokenPairs = {
+  BTC: "BTC-USD",
+  ETH: "ETH-USD",
+  SOL: "SOL-USD",
+};
+
+const selectedToken = "BTC";
+
 const requestBody = {
-  url: "https://api.coinbase.com/v2/prices/BTC-USD/spot",
+  url: `https://api.coinbase.com/v2/prices/${tokenPairs[selectedToken]}/spot`,
   httpMethod: "GET",
   headers: "{}",
   queryParams: "{}",
   body: "{}",
-  postProcessJq: "{ price: ((.data.amount | tonumber) * 100000000 | tostring | split(\".\")[0] | tonumber) }",
+
+  postProcessJq:
+    "{ price: ((.data.amount | tonumber) * 100000000 | tostring | split(\".\")[0] | tonumber) }",
+
   abiSignature: JSON.stringify({
     type: "tuple",
     components: [{ name: "price", type: "uint256" }],
