@@ -1,8 +1,11 @@
+const { decodeAbiParameters, parseAbiParameters } = require("viem");
 const { main: runFdc } = require("./fdc-run.js");
 
 async function main() {
   const token = process.env.TOKEN;
+
   const startTime = Number(process.env.START_TIME);
+
   const deadline = Number(process.env.DEADLINE);
 
   if (!token) {
@@ -32,21 +35,63 @@ async function main() {
   console.log("Triggering FDC...");
   console.log("");
 
+  // ==========================================================
+  // TRIGGER FDC
+  // ==========================================================
+
   const proofData = await runFdc({
     token,
     startTime,
     deadline,
   });
 
+  // ==========================================================
+  // GET ABI ENCODED DATA
+  // ==========================================================
+
+  const abiEncodedData = proofData.response.responseBody.abiEncodedData;
+
+  if (!abiEncodedData) {
+    throw new Error("FDC response does not contain abiEncodedData.");
+  }
+
   console.log("");
   console.log("==========================================");
-  console.log("          FDC RETURNED TO MAIN");
+  console.log("          FDC ABI DATA RECEIVED");
   console.log("==========================================");
 
-  console.log(JSON.stringify(proofData, null, 2));
+  console.log("abiEncodedData:", abiEncodedData);
+
+  // ==========================================================
+  // DECODE FDC RESULT
+  // ==========================================================
+
+  const [{ price: verifiedPrice }] = decodeAbiParameters(
+    parseAbiParameters("(uint256 price)"),
+    abiEncodedData,
+  );
+
+  // ==========================================================
+  // PRINT VERIFIED PRICE
+  // ==========================================================
+
+  console.log("");
+  console.log("==========================================");
+  console.log("             FDC RESULT");
+  console.log("==========================================");
+
+  console.log("Token:", token);
+
+  console.log("Verified price (raw):", verifiedPrice.toString());
+
+  console.log("Verified price:", Number(verifiedPrice) / 100000000);
+
+  console.log("==========================================");
 
   console.log("");
   console.log("MAIN RUN COMPLETE");
+
+  return verifiedPrice;
 }
 
 main().catch((error) => {
