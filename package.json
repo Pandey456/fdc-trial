@@ -1,0 +1,23 @@
+{
+  "name": "fdc-trial",
+  "version": "1.0.0",
+  "description": "",
+  "main": "fdc-dryrun.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pandey456/fdc-trial.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Pandey456/fdc-trial/issues"
+  },
+  "homepage": "https://github.com/Pandey456/fdc-trial#readme",
+  "dependencies": {
+    "viem": "^2.55.19"
+  }
+}
