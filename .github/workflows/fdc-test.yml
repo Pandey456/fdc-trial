@@ -1,0 +1,39 @@
+name: Veynt FDC Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      token:
+        description: "Token"
+        required: true
+        type: string
+
+      start_time:
+        description: "Start time (Unix ms)"
+        required: true
+        type: string
+
+      deadline:
+        description: "Deadline (Unix ms)"
+        required: true
+        type: string
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+
+      - run: node main-run.js
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          TOKEN: ${{ inputs.token }}
+          START_TIME: ${{ inputs.start_time }}
+          DEADLINE: ${{ inputs.deadline }}
