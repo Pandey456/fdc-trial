@@ -115,7 +115,7 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
     // min(low)
 
     postProcessJq:
-      "{ maxPrice: ((sort_by(.[2] | tonumber) | reverse | .[0][2] | tonumber) * 100000000 | floor), minPrice: ((sort_by(.[3] | tonumber) | .[0][3] | tonumber) * 100000000 | floor) }",
+      "{ maxPrice: (([.[][2] | tonumber] | max) * 100000000 | floor), minPrice: (([.[][3] | tonumber] | min) * 100000000 | floor) }",
 
     abiSignature: JSON.stringify({
       type: "tuple",
