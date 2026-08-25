@@ -120,11 +120,7 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
       type: "tuple",
       components: [
         {
-          name: "maxPrice",
-          type: "uint256",
-        },
-        {
-          name: "minPrice",
+          name: "price",
           type: "uint256",
         },
       ],
