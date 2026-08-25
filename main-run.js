@@ -1,4 +1,5 @@
 const { decodeAbiParameters, parseAbiParameters } = require("viem");
+
 const { main: runFdc } = require("./fdc-run.js");
 
 async function main() {
@@ -20,6 +21,31 @@ async function main() {
     throw new Error("DEADLINE is invalid");
   }
 
+  if (deadline <= startTime) {
+    throw new Error("DEADLINE must be after START_TIME");
+  }
+
+  // ==========================================================
+  // DETERMINE CANDLE INTERVAL
+  // ==========================================================
+
+  const durationMs = deadline - startTime;
+
+  const durationMinutes = durationMs / (60 * 1000);
+
+  const durationHours = durationMs / (60 * 60 * 1000);
+
+  // Use 1-minute candles for markets up to 16 hours.
+  // Use 1-hour candles for markets longer than 16 hours.
+
+  const MAX_1M_DURATION = 16 * 60 * 60 * 1000;
+
+  const interval = durationMs <= MAX_1M_DURATION ? "1m" : "1h";
+
+  // ==========================================================
+  // LOG
+  // ==========================================================
+
   console.log("");
   console.log("==========================================");
   console.log("           VEYNT MAIN RUNNER");
@@ -32,17 +58,30 @@ async function main() {
   console.log("Deadline:", new Date(deadline).toISOString());
 
   console.log("");
-  console.log("Triggering FDC...");
+
+  console.log("Duration (minutes):", durationMinutes);
+
+  console.log("Duration (hours):", durationHours);
+
+  console.log("");
+
+  console.log("Selected interval:", interval);
+
   console.log("");
 
   // ==========================================================
   // TRIGGER FDC
   // ==========================================================
 
+  console.log("Triggering FDC...");
+
+  console.log("");
+
   const proofData = await runFdc({
     token,
     startTime,
     deadline,
+    interval,
   });
 
   // ==========================================================
@@ -66,13 +105,13 @@ async function main() {
   // DECODE FDC RESULT
   // ==========================================================
 
-  const [{ price: verifiedPrice }] = decodeAbiParameters(
-    parseAbiParameters("(uint256 price)"),
+  const [{ maxPrice, minPrice }] = decodeAbiParameters(
+    parseAbiParameters("(uint256 maxPrice, uint256 minPrice)"),
     abiEncodedData,
   );
 
   // ==========================================================
-  // PRINT VERIFIED PRICE
+  // PRINT VERIFIED PRICES
   // ==========================================================
 
   console.log("");
@@ -82,20 +121,38 @@ async function main() {
 
   console.log("Token:", token);
 
-  console.log("Verified price (raw):", verifiedPrice.toString());
+  console.log("Interval:", interval);
 
-  console.log("Verified price:", Number(verifiedPrice) / 100000000);
+  console.log("Start:", new Date(startTime).toISOString());
 
-  console.log("==========================================");
+  console.log("Deadline:", new Date(deadline).toISOString());
 
   console.log("");
+
+  console.log("Maximum price (raw):", maxPrice.toString());
+
+  console.log("Minimum price (raw):", minPrice.toString());
+
+  console.log("");
+
+  console.log("Maximum price:", Number(maxPrice) / 100000000);
+
+  console.log("Minimum price:", Number(minPrice) / 100000000);
+
+  console.log("==========================================");
+  console.log("");
+
   console.log("MAIN RUN COMPLETE");
 
-  return verifiedPrice;
+  return {
+    maxPrice,
+    minPrice,
+  };
 }
 
 main().catch((error) => {
   console.error("");
+
   console.error("==========================================");
   console.error("              MAIN RUN FAILED");
   console.error("==========================================");

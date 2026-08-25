@@ -60,7 +60,7 @@ function toBytes32(text) {
 // STEP 1
 // ============================================================
 
-async function prepareRequest({ token, startTime, deadline, interval }) {
+async function prepareRequest({ token, startTime, deadline }) {
   const symbol = TOKEN_SYMBOLS[token];
 
   if (!symbol) {
@@ -74,15 +74,10 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
 
   console.log("Token:", token);
   console.log("Binance symbol:", symbol);
-  console.log("Interval:", interval);
 
   console.log("Start:", new Date(startTime).toISOString());
 
   console.log("Deadline:", new Date(deadline).toISOString());
-
-  // ==========================================================
-  // BINANCE REQUEST
-  // ==========================================================
 
   const requestBody = {
     url: "https://data-api.binance.vision/api/v3/klines",
@@ -93,39 +88,25 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
 
     queryParams: JSON.stringify({
       symbol: symbol,
-      interval: interval,
-      startTime: startTime,
-      endTime: deadline,
-      limit: "1000",
+      interval: "1m",
+
+      // CURRENT TEST:
+      // We only fetch the candle at deadline.
+      startTime: deadline,
+
+      limit: "1",
     }),
 
     body: "{}",
 
-    // Binance kline structure:
-    //
-    // [0] Open time
-    // [1] Open
-    // [2] High
-    // [3] Low
-    // [4] Close
-    //
-    // We want:
-    //
-    // max(high)
-    // min(low)
-
     postProcessJq:
-      "{ maxPrice: ((max_by(.[2] | tonumber)[2] | tonumber) * 100000000 | floor), minPrice: ((min_by(.[3] | tonumber)[3] | tonumber) * 100000000 | floor) }",
+      '{ price: ((.[0][4] | tonumber) * 100000000 | tostring | split(".")[0] | tonumber) }',
 
     abiSignature: JSON.stringify({
       type: "tuple",
       components: [
         {
-          name: "maxPrice",
-          type: "uint256",
-        },
-        {
-          name: "minPrice",
+          name: "price",
           type: "uint256",
         },
       ],
@@ -133,14 +114,8 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
   };
 
   console.log("");
-
   console.log("Request body:");
-
   console.log(JSON.stringify(requestBody, null, 2));
-
-  // ==========================================================
-  // FDC REQUEST
-  // ==========================================================
 
   const body = {
     attestationType: toBytes32("Web2Json"),
@@ -155,6 +130,7 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
 
     headers: {
       "Content-Type": "application/json",
+
       "X-API-KEY": API_KEY,
     },
 
@@ -168,7 +144,6 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
   }
 
   console.log("");
-
   console.log("Step 1 OK — abiEncodedRequest ready");
 
   console.log("abiEncodedRequest:", data.abiEncodedRequest);
@@ -370,7 +345,6 @@ async function getProof(roundId, abiEncodedRequest) {
   console.log("DA layer status:", res.status);
 
   console.log("");
-
   console.log("FDC response:");
 
   console.log(JSON.stringify(data, null, 2));
@@ -380,7 +354,6 @@ async function getProof(roundId, abiEncodedRequest) {
   }
 
   console.log("");
-
   console.log("Step 4 OK — proof received");
 
   return data;
@@ -390,12 +363,8 @@ async function getProof(roundId, abiEncodedRequest) {
 // MAIN
 // ============================================================
 
-async function main({ token, startTime, deadline, interval }) {
+async function main({ token, startTime, deadline }) {
   token = token.toUpperCase();
-
-  if (interval !== "1m" && interval !== "1h") {
-    throw new Error(`Invalid interval: ${interval}. Expected 1m or 1h.`);
-  }
 
   console.log("");
   console.log("==========================================");
@@ -404,44 +373,36 @@ async function main({ token, startTime, deadline, interval }) {
 
   console.log("TOKEN:", token);
 
-  console.log("INTERVAL:", interval);
-
   console.log("START:", new Date(startTime).toISOString());
 
   console.log("DEADLINE:", new Date(deadline).toISOString());
 
-  // ========================================================
   // STEP 1
-  // ========================================================
-
   const abiEncodedRequest = await prepareRequest({
     token,
     startTime,
     deadline,
-    interval,
   });
 
-  // ========================================================
   // STEP 2
-  // ========================================================
-
   const roundId = await submitRequest(abiEncodedRequest);
 
-  // ========================================================
   // STEP 3
-  // ========================================================
-
   await waitForFinalization(180);
 
-  // ========================================================
   // STEP 4
-  // ========================================================
-
   const proof = await getProof(roundId, abiEncodedRequest);
 
   // ========================================================
-  // COMPLETE
+  // PRICE
   // ========================================================
+
+  /*
+   * For now we return the complete proof.
+   *
+   * Once we confirm the exact response structure,
+   * we can decode the attested price directly here.
+   */
 
   console.log("");
   console.log("==========================================");
@@ -450,22 +411,13 @@ async function main({ token, startTime, deadline, interval }) {
 
   console.log("Token:", token);
 
-  console.log("Interval:", interval);
-
-  console.log("Start:", new Date(startTime).toISOString());
-
   console.log("Deadline:", new Date(deadline).toISOString());
 
   console.log("");
-
   console.log("FDC proof received successfully.");
 
   return proof;
 }
-
-// ============================================================
-// EXPORT
-// ============================================================
 
 module.exports = {
   main,
