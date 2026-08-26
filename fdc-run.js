@@ -51,7 +51,6 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
     url: "https://data-api.binance.vision/api/v3/klines",
     httpMethod: "GET",
     headers: "{}",
-
     queryParams: JSON.stringify({
       symbol: symbol,
       interval: interval,
@@ -59,31 +58,14 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
       endTime: deadline,
       limit: "1000",
     }),
-
     body: "{}",
-    // postProcessJq:
-    //   '{ price: ((.[0][4] | tonumber) * 100000000 | tostring | split(".")[0] | tonumber) }',
-
-    // postProcessJq:
-    //   '{ price: ((.[0][2] | tonumber) * 100000000 | tostring | split(".")[0] | tonumber) }',
     postProcessJq:
-      "{ price: ((map(.[2] | tonumber) | max) * 100000000 | floor) }",
-    // abiSignature: JSON.stringify({
-    //   type: "tuple",
-    //   components: [
-    //     {
-    //       name: "price",
-    //       type: "uint256",
-    //     },
-    //   ],
-    // }),
+      '{ maxPrice: ((map(.[2] | tonumber) | sort | last) * 100000000 | tostring | split(".")[0] | tonumber), minPrice: ((map(.[3] | tonumber) | sort | first) * 100000000 | tostring | split(".")[0] | tonumber) }',
     abiSignature: JSON.stringify({
       type: "tuple",
       components: [
-        {
-          name: "price",
-          type: "uint256",
-        },
+        { name: "maxPrice", type: "uint256" },
+        { name: "minPrice", type: "uint256" },
       ],
     }),
   };
