@@ -64,8 +64,8 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
     // postProcessJq:
     //   '{ price: ((.[0][4] | tonumber) * 100000000 | tostring | split(".")[0] | tonumber) }',
 
-    postProcessJq:
-      '{ price: ((.[0][2] | tonumber) * 100000000 | tostring | split(".")[0] | tonumber) }',
+    // postProcessJq:
+    //   '{ price: ((.[0][2] | tonumber) * 100000000 | tostring | split(".")[0] | tonumber) }',
     postProcessJq:
       "{ maxPrice: (([.[][2] | tonumber] | max) * 100000000 | floor), minPrice: (([.[][3] | tonumber] | min) * 100000000 | floor) }",
     // abiSignature: JSON.stringify({
