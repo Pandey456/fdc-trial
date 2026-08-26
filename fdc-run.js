@@ -76,6 +76,9 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
       ],
     }),
   };
+  console.log("");
+  console.log("Request body:");
+  console.log(JSON.stringify(requestBody, null, 2));
 
   const body = {
     attestationType: toBytes32("Web2Json"),
