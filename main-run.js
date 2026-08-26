@@ -105,8 +105,12 @@ async function main() {
   // DECODE FDC RESULT
   // ==========================================================
 
-  const [{ maxPrice, minPrice }] = decodeAbiParameters(
-    parseAbiParameters("(uint256 maxPrice, uint256 minPrice)"),
+  // const [{ maxPrice, minPrice }] = decodeAbiParameters(
+  //   parseAbiParameters("(uint256 maxPrice, uint256 minPrice)"),
+  //   abiEncodedData,
+  // );
+  const [{ price: verifiedPrice }] = decodeAbiParameters(
+    parseAbiParameters("(uint256 price)"),
     abiEncodedData,
   );
 

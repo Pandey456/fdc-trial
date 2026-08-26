@@ -67,7 +67,7 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
     // postProcessJq:
     //   '{ price: ((.[0][2] | tonumber) * 100000000 | tostring | split(".")[0] | tonumber) }',
     postProcessJq:
-      "{ maxPrice: (([.[][2] | tonumber] | max) * 100000000 | floor), minPrice: (([.[][3] | tonumber] | min) * 100000000 | floor) }",
+      "{ price: ((map(.[2] | tonumber) | max) * 100000000 | floor) }",
     // abiSignature: JSON.stringify({
     //   type: "tuple",
     //   components: [
@@ -81,11 +81,7 @@ async function prepareRequest({ token, startTime, deadline, interval }) {
       type: "tuple",
       components: [
         {
-          name: "maxPrice",
-          type: "uint256",
-        },
-        {
-          name: "minPrice",
+          name: "price",
           type: "uint256",
         },
       ],
